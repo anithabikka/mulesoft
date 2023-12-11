@@ -1,0 +1,344 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="3fdfd78b-9582-4e98-95aa-f3c0022fa2fa" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<flow name="dataweaveFlow" doc:id="8e4c3a75-ddd0-4a28-bed2-332a5e8d2bb0" >
+		<http:listener doc:name="Listener" doc:id="4b26b12f-5782-46aa-b07f-75ff52747a14" path="/dataWeave" config-ref="HTTP_Listener_config"/>
+		<ee:transform doc:name="Map" doc:id="075eb099-276b-4d0f-9f30-ad9be334737e" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+var a=[
+	{
+	"name": "anitha",
+	"org": ["diatoz","cgi","amb"],
+    "id":123
+},
+{
+	"name": "kalyani",
+	"org": ["softtech","cgi","hfg"],
+    "id":456
+},
+{
+	"name": "deekshitha",
+	"org": ["epam","lg","deu"],
+    "id":234
+}]
+output application/JSON
+---
+//a map{
+//	"EmployeeName":$.name,
+//	"Company":$.org map {
+//   "Company_Name:$  
+//},
+//	"employeeId":$.id,
+//	"UniqueId":$.name ++ "_"  ++ $.org ++ "_",
+//	"What is dollar dollar":$$
+//}
+a map ((item, index) ->{
+	"EmployeeName": item.name,
+	"Company": item.org map{
+		"Company_Name":$ ++"_" ++  item.name
+	},
+	"employeeId": item.id,
+	"UniqueId": item.name ++  "_" ++ item.id,
+	"What is dollar dollar": index
+} )
+//a reduce{$ ++ $$} if we wan't keep everything in a single object
+
+//   { "name": "anitha",
+//    "org":"diatoz",
+//    "id":123,
+//    "name": "kalyani",
+//    "org":"softtech",
+//    "id":456,
+//    "name": "deekshitha",
+//    "org":"epam",
+//    "id":234
+//}this will be the output
+]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<ee:transform doc:name="Map Object" doc:id="49bde54f-f316-4b2e-8174-e993a440ed37" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+
+var a = {
+    name: "anitha",
+    org: "diatoz",
+    id: 123
+}
+
+---
+a mapObject ((value, key, index) ->{
+	"my value":value,
+	"my key":key,
+	"my index":index
+} )
+]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<ee:transform doc:name="Converting one format to other" doc:id="3867d72d-0b46-4881-82f3-bb0e066425d3" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+
+var a=[
+	{
+	"name": "anitha",
+	"org": ["diatoz","cgi","amb"],
+    "id":123
+},
+{
+	"name": "kalyani",
+	"org": ["softtech","cgi","hfg"],
+    "id":456
+},
+{
+	"name": "deekshitha",
+	"org": ["epam","lg","deu"],
+    "id":234
+}]
+output application/xml
+---
+EmployyeDetails:
+Employee:
+a map{
+	"EmployeeName":$.name,
+	"EmployeeId":$.id,
+	"EmployeeCompany":$.org
+	
+}
+]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<ee:transform doc:name="Pluck" doc:id="e29e4627-3acd-4e0b-a2bd-a7b64cdc6c1e" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+var a={
+    "name": "anitha",
+    "org":"diatoz",
+    "id":123
+
+}
+output application/json
+---
+a pluck ((value, key, index) ->{
+	" what is the value":value,
+	"what is the key":key
+	
+} )
+]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<ee:transform doc:name="Flatten" doc:id="8ddadb14-d0bf-4645-aae5-40d54dcc6ab0" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+
+var a=[{
+   "name": "anitha",
+    "org":"diatoz",
+    "id":123
+
+},
+{
+    "name": "kalyani",
+    "org":"softtech",
+    "id":456
+
+},
+{
+    "name": "deekshitha",
+    "org":"epam",
+    "id":234
+
+}
+]
+var b=[{
+   "name": "anitha",
+    "org":"diatoz",
+    "id":123
+
+},
+{
+    "name": "kalyani",
+    "org":"softtech",
+    "id":456
+
+},
+{
+    "name": "deekshitha",
+    "org":"epam",
+    "id":234
+
+}
+]
+
+output application/json
+---
+//( flatten(a+b).name)
+//flatten(a+b)
+flatten(( a map upper($.name))+(a map upper ($.name)))
+ 
+]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<ee:transform doc:name="Filter" doc:id="86a406dc-6a0a-4b63-9cb9-f8d5eca35519" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+var a=[{
+   "name": "anitha",
+    "org":"diatoz",
+    "id":123
+
+},
+{
+    "name": "kalyani",
+    "org":"softtech",
+    "id":456
+
+},
+{
+    "name": "keerthi",
+    "org":"softtech",
+    "id":158
+
+},
+{
+    "name": "deekshitha",
+    "org":"epam",
+    "id":234
+
+}
+]
+
+output application/java
+---
+(a map{
+	"EmployeeName":$.name,
+	"EmployeeId":$.id,
+	"Status":if ($.id> 200)"They are working" else "Not working"
+})groupBy $.Status
+//filter $.EmployeeId >210
+//groupBy $.EmployeeName]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<ee:transform doc:name="Xml attributes" doc:id="8f116a3f-90ad-4494-ae42-d46e4909b0d2" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+var a=[{
+    "name": "anitha",
+    "org":"diatoz",
+    "id":123
+
+},
+{
+    "name": "kalyani",
+    "org":"softtech",
+    "id":456
+
+},
+{
+    "name": "deekshitha",
+    "org":"epam",
+    "id":234
+
+}
+]
+
+output application/xml
+---
+EmployeeDetails:
+{
+(a map  {
+	Employee @(id: $.id):{
+	" EmployeeName":$.name,
+	"Company":$.org
+	
+	}
+})}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<ee:transform doc:name="Calling dwl" doc:id="fe49e8a4-62c3-4db6-8526-ecfda71987a7" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+{
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<ee:transform doc:name="Custom function" doc:id="1b234429-89de-4e29-ace1-78b84b238ac1" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+ var a=[{
+    "name": "anitha",
+    "org":"diatoz",
+    "maths":55,
+    "physics":70,
+    "social":30
+
+},
+{
+    "name": "kalyani",
+    "org":"softtech",
+    "maths":25,
+    "physics":30,
+    "social":80
+
+},
+{
+    "name": "deekshitha",
+    "org":"epam",
+    "maths":25,
+    "physics":80,
+    "social":40
+
+}
+]
+output application/java
+fun CustomResult(marks)= if (marks>35)"pass"else "fail"
+---
+a map{
+	"StudentName":$.name,
+	"StudentOrg":$.org,
+	"SubjectWiseDetails":{
+	"maths":{marks:$.maths ,Status:CustomResult($.maths)},
+	"physics":{marks:$.physics ,Status:CustomResult($.physics)},
+	"social":{marks:$.social ,Status:CustomResult($.social)}	
+	//"maths":{marks:$.maths ,Status: if($.maths>35)"Pass" else "fail"},
+	//"physics":{marks:$.physics ,Status: if($.physics>35)"Pass" else "fail"},
+	//"social":{marks:$.social, Status: if($.social>35)"Pass" else "fail"}
+		
+	}
+}
+]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="dataweaveFlow1" doc:id="7ef4fc74-f567-4125-a000-0b3306c8b58b" >
+		<ee:transform doc:name="private flow" doc:id="d84c53db-2561-41eb-b761-43e3c32dcd6f">
+			<ee:message>
+				<ee:set-payload><![CDATA["hello " ++  payload as String]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="dataweaveFlow2" doc:id="562bec4f-f37f-4c3e-b6f2-e3132c073090" >
+		<http:listener doc:name="Listener" doc:id="19db9bba-f14d-4b98-8b84-db8bc1b62a32" path="/data" config-ref="HTTP_Listener_config"/>
+		<ee:transform doc:name="Mule::lookup" doc:id="e37791f9-2223-4f86-84e0-d15f37e96826" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	message : Mule::lookup ("dataweaveFlow1" , "how are you")
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>

@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<http:listener-config name="HTTP_Listener_config1" doc:name="HTTP Listener config" doc:id="5e5fb813-3c0a-442c-97b5-6794f9a56626" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<flow name="dataweave2Flow" doc:id="80d30996-f3d3-4800-94b2-ea4b8c9e3ef4" >
+		<http:listener doc:name="Listener" doc:id="bed5e3cc-8322-473e-b2d9-d6849d751012" config-ref="HTTP_Listener_config1" path="/transform "/>
+		<ee:transform doc:name="Transform Message" doc:id="f8cd75ab-e676-44cd-a117-63075f16f153" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+var a={
+    "name":"hgykjj",
+    "roll no":44,
+    "place":"banglore",
+    "qualification":"degree"
+}
+output application/csv
+---
+//for xml we have to root value ex:hii:a
+//now()
+a
+//"hii "++ payload.name ++ "your qualification is "++ payload.qualification]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<ee:transform doc:name="map" doc:id="77384501-d9b0-4b68-b55a-00c1cd94da51" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+var a=[{
+    "name":"hgykjj",
+    "roll no":44,
+    "place":"banglore",
+    "qualification":"degree"
+},
+{
+    "name":"gywj",
+    "roll no":446,
+    "place":"ongole",
+    "qualification":"pharmacy"
+},
+{
+    "name":"dejj",
+    "roll no":56,
+    "place":"hyderabad",
+    "qualification":"btech"
+}]
+output application/json
+---
+
+//a map {
+//	"candidate":$.name,
+//	//"id":$."roll no",
+//	"address":$.place,
+//	"graduation":$.qualification,
+//	"uniqueid":$.name ++ "_" ++ $."roll no" ++ "_" ++$.place
+//}
+a map ((item, index) ->  {
+	"candidate":item.name,
+	"id":item."roll no",
+	"address":item.place,
+	"graduation":item.qualification,
+	"unique id":item.name ++ "_" ++ item."roll no" ++ "_" ++ item.place,
+	"what is dollar dollar":index
+
+})]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<ee:transform doc:name="mapObject" doc:id="6a710187-50a2-4c99-8796-78577725e6d5" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+var a ={
+    "name":"hgykjj",
+    "roll no":44,
+    "place":"banglore",
+    "qualification":"degree"
+}
+//{
+//    "name":"gywj",
+//    "roll no":446,
+//    "place":"ongole",
+//    "qualification":"pharmacy"
+//},
+//{
+//    "name":"dejj",
+//    "roll no":56,
+//    "place":"hyderabad",
+//    "qualification":"btech"
+//}
+output application/json
+---
+a mapObject(key,value,index)->{
+	"what is the value":value
+} 
+]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<ee:transform doc:name="reduce" doc:id="9e4b16f0-d07e-411e-b166-30f130815079" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+var a =  [ 
+	{
+    "name":"hgykjj",
+    "roll no":44,
+    "place":"banglore",
+    "qualification":"degree"
+},
+{
+    "name":"gywj",
+    "roll no":446,
+    "place":"ongole",
+    "qualification":"pharmacy"
+},
+{
+    "name":"dejj",
+    "roll no":56,
+    "place":"hyderabad",
+    "qualification":"btech"
+}]
+output application/json
+---
+ 
+Student:a reduce ($++$$)
+
+
+
+]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<ee:transform doc:name="pluck" doc:id="c57830ef-5727-47e0-9fb2-7fb8aa20e157">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+var a ={
+    "name":"hgykjj",
+    "roll no":44,
+    "place":"banglore",
+    "qualification":"degree"
+}
+
+output application/json
+---
+a pluck(ley,value,index)->{
+	"what is the value":value
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<ee:transform doc:name="customfinction" doc:id="352336f3-86e3-48bf-9f36-6185febf08eb">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+var a =[{
+    "name":"hgykjj",
+    "roll no":44,
+    "place":"banglore",
+    "qualification":"degree"
+},
+{
+    "name":"gywj",
+    "roll no":446,
+    "place":"ongole",
+    "qualification":"pharmacy"
+},
+{
+    "name":"dejj",
+    "roll no":56,
+    "place":"hyderabad",
+    "qualification":"btech"
+}]
+output application/json
+---
+a map{
+
+	"candidate":$.name,
+	"id":$."roll no",
+	"address":$.place,
+	"graduation":$.qualification,
+	"uniqueid":$.name ++ "_" ++ $."roll no" ++ "_" ++$.place
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>

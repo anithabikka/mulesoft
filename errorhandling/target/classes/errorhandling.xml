@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="a46dcd4a-2c2f-438a-82cf-be8ce8c7c993" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<http:request-config name="HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="96a266ca-181b-4d72-ae46-8258d2ddc223" >
+		<http:request-connection host="localhost" />
+	</http:request-config>
+	<configuration doc:name="Configuration" doc:id="931d9439-7f15-4fbd-96ae-bfebc456b996" defaultErrorHandler-ref="common-error-handlingError_Handler" />
+	<flow name="errorhandlingFlow" doc:id="ddf731a0-3b35-402c-b59c-8c8fbcd9477c" >
+		<http:listener doc:name="Listener" doc:id="46c35145-f303-4bf1-9dcc-c35c4f6dd6ec" config-ref="HTTP_Listener_config" path="/error">
+			<http:error-response >
+				<http:body ><![CDATA[#[payload]]]></http:body>
+			</http:error-response>
+		</http:listener>
+		<set-payload value='#[" Before HTTP request "]' doc:name="Set Payload" doc:id="1ca2b5a7-b3b7-4a1a-b4b5-1e376c522ba6" />
+		<http:request method="GET" doc:name="Request" doc:id="b0678503-a24f-47ee-a1fc-8a6f58dfc1c0" url="http://err.com"/>
+		<set-payload value='#["After HTTP request "]' doc:name="Set Payload" doc:id="2d6f1b01-62d7-4303-9fd9-98df2f4e8f54" />
+		<error-handler >
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="f218e08e-1372-48d4-9e5c-6ddab5f36f66" type="HTTP:BAD_REQUEST, HTTP:CONNECTIVITY">
+				<set-payload value='#["Inside error Block "]' doc:name="Set Payload" doc:id="a14054f1-0b26-44c3-b262-8edbf7b239a3" />
+				<logger level="INFO" doc:name="Logger" doc:id="3620607f-0889-453a-aba9-f92a8c80ed26" />
+			</on-error-continue>
+		</error-handler>
+	</flow>
+	<flow name="errorhandlingFlow1" doc:id="787794e5-10ec-43cb-90ba-b4d90ec6ce30" >
+		<http:listener doc:name="Listener" doc:id="e3d0fa3f-68f5-4727-aabf-a3600e09bd0b" config-ref="HTTP_Listener_config" path="/error1"/>
+		<set-payload value='#["before HTTP request "]' doc:name="Set Payload" doc:id="3ccb52b9-158e-4226-b3df-2e1cd1ace0ad" />
+		<http:request method="GET" doc:name="Request" doc:id="8938ffc0-8d63-4a1c-9611-c711f363c9b1" config-ref="HTTP_Request_configuration" url="http://err.com"/>
+		<set-payload value='#["after HTTP request"]' doc:name="Set Payload" doc:id="626f7965-2274-4d32-beab-ad6cfa59847c" />
+		<error-handler >
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="2ee60848-c9de-40d9-b96e-ad130413a5dd" >
+				<set-payload value='#[" inside error block "]' doc:name="Set Payload" doc:id="95c24ef8-6119-4890-bb31-ceccc2edf8ac" />
+				<logger level="INFO" doc:name="Logger" doc:id="2eb5460f-b8b0-47c7-87e3-1981f71526ff" />
+			</on-error-propagate>
+		</error-handler>
+	</flow>
+	<flow name="errorhandlingFlow2" doc:id="458df246-65f3-46d6-a629-3de4871fba83" >
+		<http:listener doc:name="Listener" doc:id="48e8c75b-a59e-4472-bef7-d127e3539fd9" config-ref="HTTP_Listener_config" path="/error2"/>
+		<set-payload value='#["before http request"]' doc:name="Set Payload" doc:id="c48fb589-d71c-4241-96c3-b71e24ee8931" />
+		<flow-ref doc:name="Flow Reference" doc:id="6c04c51b-7b07-4dbf-83d8-7b8458f3a4fd" name="errorhandlingFlow3"/>
+		<set-payload value='#["after http request"]' doc:name="Set Payload" doc:id="784ec3cd-7050-469a-87a6-d4a6a9d78a96" />
+		<error-handler>
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="6e479766-e0a3-4892-bdef-a4a3d70b50c5" type="ANY">
+				<set-payload value='#["IT is main flow"]' doc:name="Set Payload" doc:id="3120ebe3-5390-4a13-9fd4-533e95554e21" />
+				<logger level="INFO" doc:name="Logger" doc:id="076c9dbe-d046-49b1-975a-dd1316757be7" />
+			</on-error-propagate>
+		</error-handler>
+	</flow>
+	<flow name="errorhandlingFlow3" doc:id="3262e368-d0ae-4381-b479-bc7e3e51c357" >
+		<http:request method="GET" doc:name="Request" doc:id="7d0ffbba-f4a5-4427-b057-dba299267b7f" config-ref="HTTP_Request_configuration" url="http://err.com"/>
+		<set-payload value='#["after http request in private flow"]' doc:name="Set Payload" doc:id="ba4976a2-c1ae-494c-8833-c2b9dd08f7ff" />
+		<error-handler >
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="a7ad3ac4-3563-492a-99b2-1c37e9113fbd">
+				<set-payload value='#["inside the PRIVATE"]' doc:name="Set Payload" doc:id="3d60e41d-59d9-42dd-af1f-70f433476bff" />
+				<logger level="INFO" doc:name="Logger" doc:id="9e003b37-9edb-4a87-a482-d835dd71908c" />
+			</on-error-propagate>
+		</error-handler>
+	</flow>
+</mule>

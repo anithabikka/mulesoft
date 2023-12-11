@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd">
+	<error-handler name="common-error-handlingError_Handler" doc:id="2ee438c6-8bf6-42c7-bd20-77f1292d5f44" >
+		<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="96014ca2-8483-48d6-95c1-2dc937d03470" type="HTTP:BAD_REQUEST, HTTP:CONNECTIVITY">
+			<set-payload value='#["inside the global "]' doc:name="Set Payload" doc:id="22ced6e1-e789-409d-a7a6-6c9ca42f09c1" />
+		</on-error-continue>
+		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="98bf55f0-e6c8-4193-bc47-6781493dc050" type="HTTP:BAD_REQUEST, HTTP:CONNECTIVITY"/>
+	</error-handler>
+</mule>
